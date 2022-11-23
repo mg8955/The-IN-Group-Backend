@@ -1,37 +1,61 @@
-// THOUGHTTEXT
-// String
-// Required
-// between 1-280 char
+const { Schema, model } = require('mongoose');
 
-// CREATEDAT
-// Date object
-// default: current timestamp
+const thoughtSchema = new Schema(
+    {
+        thoughtText: {
+            type: String,
+            required: true,
+            min: [1, 'Please enter your thoughts!'],
+            max: [280, 'This isn\'t the place for your thesis!'],
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now,
+        },
+        userName: {
+            type: String,
+            required: true,
+        },
+        reactions: [reactionSchema]
+    },
+    {
+        toJSON: {
+            virtuals: true,
+        },
+        id: null,
+    }
+);
 
-// USERNAME
-// String
-// Required
+thoughtSchema
+    .virtual('reactionCount')
+    .get(function () {
+        return this.reactions.length;
+    });
 
-// REACTIONS
-// Array of nested docs created with REACTION Schema
+const reactionSchema = new Schema(
+    {
+        reactionId: {
+            type: Schema.Types.ObjectId,
+            default: () => new Types.ObjectId(),
+        },
+        reactionBody: {
+            type: String,
+            required: true,
+            min: [1, "Please enter your reaction!"],
+            max: [280, "This isn\'t the place for your thesis!"],
+        },
+        userName: {
+            type: String,
+            required: true,
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now,
+            // getter method to format timestamp on query
+        }
+    }
+);
 
-// VIRTUAL reactionCOUNT
-// number of reactions on a thought reaction array
+const Thought = model('thought', thoughtSchema);
 
-// REACTION SCHEMA
-// reactionID
-// use ObjectId data type
-// default set to new ObjectId
-
-// REACTIOBODY
-// String
-// Required
-// between 1-280 char
-
-// Username
-// String
-// Required
-
-// createdAt
-// Date object
-// default: current timestamp
-// getter method to format timestampt on query
+module.exports = Thought;
