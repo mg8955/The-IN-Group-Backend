@@ -1,5 +1,3 @@
-// DELETE friend from user friend list
-
 const { User, Reaction } = require('../models');
 
 module.exports = {
@@ -13,8 +11,10 @@ module.exports = {
 
     // Controller gets a single user
     getSingleUser(req, res) {
+        console.log(req.params.userId);
         User.findOne({ _id: req.params.userId })
-        .select('-__v')
+        .populate('thoughts')
+        .populate('friends')
         .then((user) => 
             !user
             ? req.status(404).json({ message: 'No user with this ID' })
@@ -30,12 +30,29 @@ module.exports = {
             .catch((err) => res.status(500).json(err));
     },
 
+    // Controller to update a user
+    updateUser(req, res) {
+        console.log(req.body);
+        User.findOneAndUpdate(
+            
+            { _id: req.params.userId },
+            { $set: req.body },
+            { runValidators: true, new: true}
+        )
+            .then((user) =>
+                !user
+                    ? res.status(404).json({ message: 'No user with this id' })
+                    : res.json(user) 
+                )
+            .catch((err) => res.status(500).json(err));
+    },
+
     // Delete a user and their thoughts/reactions
     deleteUser(req, res) {
         User.findOneAndDelete({ _id: req.params.userId })
             .then((user) => 
             !user
-                ? res.status(404).json({ 'No user with this ID' })
+                ? res.status(404).json({ message: 'No user with this ID' })
                 : Reaction.deleteMany({ _id: { $in: user.reactions } })
             )    
             .then((user) =>    
