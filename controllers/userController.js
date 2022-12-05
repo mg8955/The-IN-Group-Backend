@@ -1,4 +1,4 @@
-const { User, Reaction } = require('../models');
+const { User, Thought } = require('../models');
 
 module.exports = {
 
@@ -11,10 +11,13 @@ module.exports = {
 
     // Controller gets a single user
     getSingleUser(req, res) {
-        console.log(req.params.userId);
         User.findOne({ _id: req.params.userId })
-        .populate('thoughts')
-        .populate('friends')
+        .populate({
+            path: 'thoughts'
+        })
+        .populate({
+            path: 'friends'
+        })
         .then((user) => 
             !user
             ? req.status(404).json({ message: 'No user with this ID' })
@@ -32,7 +35,6 @@ module.exports = {
 
     // Controller to update a user
     updateUser(req, res) {
-        console.log(req.body);
         User.findOneAndUpdate(
             
             { _id: req.params.userId },
@@ -53,12 +55,9 @@ module.exports = {
             .then((user) => 
             !user
                 ? res.status(404).json({ message: 'No user with this ID' })
-                : Reaction.deleteMany({ _id: { $in: user.reactions } })
+                : Thought.deleteMany({ _id: { $in: user.thoughts } } )
             )    
-            .then((user) =>    
-                Thought.deleteMany({ _id: { $in: user.thoughts } } )
-            )
-            .then(() => res.json({ message: 'User and their thoughts/reactions deleted successfully' }))
+            .then(() => res.json({ message: 'User and their thoughts deleted successfully' }))
             .catch((err) => res.status(500).json(err));
     },
 
@@ -66,7 +65,7 @@ module.exports = {
     addFriend(req, res) {
         User.findOneAndUpdate(
             { _id: req.params.userId },
-            { $addToSet: { friends: req.body } },
+            { $push: { friends: req.params.friendId } },
             { runValidators: true, new: true }
         )
             .then((user) => 
