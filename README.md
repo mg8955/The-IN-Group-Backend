@@ -17,7 +17,7 @@
  Use npm i to install dependencies.
  ## Usage
  ---
- Please use a tool such as Insomia to view routes.
+ Please use a tool such as [Insomia](https://insomnia.rest/download) to view routes.
  ## License
  ---
  ![](https://img.shields.io/badge/license-MIT-brightgreen) [Click here for more information about the MIT license.](https://choosealicense.com/licenses/mit/)
